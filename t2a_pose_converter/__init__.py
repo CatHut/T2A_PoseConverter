@@ -6,7 +6,7 @@
 bl_info = {
     "name": "T2A PoseConverter",
     "author": "CatHut",
-    "version": (1, 1, 0),
+    "version": (1, 0, 1),
     "blender": (3, 6, 0),
     "location": "View3D > Tool Shelf > CatHut",
     "description": "Convert pose between T‑pose and A‑pose",
