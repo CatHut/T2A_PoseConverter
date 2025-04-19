@@ -1,3 +1,5 @@
+[日本語版 README はこちら / Japanese README here](README-ja.md)
+
 # T2A PoseConverter
 
 ![main](doc/T2A.png)
