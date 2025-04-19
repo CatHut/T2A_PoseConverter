@@ -50,10 +50,6 @@ def find_related_mesh_objects(arm_obj):
                     if obj not in related_meshes:
                         related_meshes.append(obj)
     
-    write_log(f"Found {len(related_meshes)} mesh objects with armature modifier targeting '{arm_obj.name}'")
-    for mesh in related_meshes:
-        write_log(f"  - {mesh.name}")
-        
     return related_meshes
 
 def apply_shape_key_as_basis(obj, key_name):
