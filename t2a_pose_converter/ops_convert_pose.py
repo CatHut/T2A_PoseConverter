@@ -12,42 +12,40 @@ from .utils import (
     apply_new_armature_modifier
 )
 
-def rotate_bone_y_global(pbone, angle_deg):
-    """グローバルY軸周りにボーンを回転させる関数（改良版）"""
+def rotate_bone_y_global(pbone, angle_deg, axis='Y'):
+    """ボーン頭を支点にグローバル軸周りにボーンを回転させる関数
+    
+    Parameters:
+        pbone: 回転させるポーズボーン
+        angle_deg: 回転角度（度数法）
+        axis: 回転軸 ('X', 'Y', 'Z'のいずれか)
+    """
     # 角度をラジアンに変換
     angle_rad = radians(angle_deg)
-    
-    # グローバルY軸回転のクォータニオン
-    rot_quat = mathutils.Quaternion((0, 1, 0), angle_rad)
     
     # アーマチュアオブジェクトを取得
     armature = pbone.id_data
     
-    # 親のワールド行列を取得（いなければアーマチュアのワールド）
-    if pbone.parent:
-        parent_world = armature.matrix_world @ pbone.parent.matrix
-    else:
-        parent_world = armature.matrix_world
+    # グローバル軸での回転行列を作成
+    rot_matrix = mathutils.Matrix.Rotation(angle_rad, 4, axis)
     
-    # 現在のローカルマトリクスをワールドに変換
-    bone_local = pbone.matrix_basis
-    bone_world = parent_world @ bone_local
+    # 現在のワールド行列とボーン頭のワールド座標を取得
+    world_mat = armature.matrix_world @ pbone.matrix
+    head_world = armature.matrix_world @ pbone.head  # 回転の支点
     
-    # グローバルY軸で回転（ワールド空間で前掛け）
-    rot_matrix = rot_quat.to_matrix().to_4x4()
-    new_bone_world = rot_matrix @ bone_world
+    # 支点を原点に移動 → 回転 → 元に戻す
+    translate_to_origin = mathutils.Matrix.Translation(-head_world)
+    translate_back = mathutils.Matrix.Translation(head_world)
+    new_world_mat = translate_back @ rot_matrix @ translate_to_origin @ world_mat
     
-    # トランスレーションを維持
-    new_bone_world.translation = bone_world.translation
-    
-    # ローカルに戻して matrix_basis に反映
-    new_local = parent_world.inverted() @ new_bone_world
-    pbone.matrix_basis = new_local
+    # ローカル座標に戻して適用
+    pbone.matrix = armature.matrix_world.inverted() @ new_world_mat
     
     # デバッグログを追加
-    write_log(f"Rotated bone {pbone.name} by {angle_deg} degrees around global Y axis")
-    write_log(f"  Original matrix_basis: {bone_local}")
-    write_log(f"  New matrix_basis: {new_local}")
+    write_log(f"Rotated bone {pbone.name} by {angle_deg} degrees around global {axis} axis")
+    write_log(f"  Original matrix: {world_mat}")
+    write_log(f"  New matrix: {new_world_mat}")
+
 
 def apply_as_rest_pose(armature_obj):
     """現在のポーズをレストポーズとして適用する関数"""
