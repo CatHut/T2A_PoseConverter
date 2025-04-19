@@ -350,6 +350,7 @@ class POSECONV_OT_ConvertPose(Operator):
     bl_idname = "poseconv.convert_pose"
     bl_label = "Convert Pose (Safe for Shape Keys)"
     bl_description = "Convert T/A pose and rebuild shape key Basis if necessary"
+    bl_options = {'REGISTER', 'UNDO'} 
 
     def execute(self, context):
         write_log("Starting pose conversion...")
@@ -492,6 +493,7 @@ class POSECONV_OT_SetRestPose(Operator):
     bl_idname = "poseconv.set_rest_pose"
     bl_label = "Set Current as Rest Pose"
     bl_description = "Set current pose as rest pose and update meshes"
+    bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         write_log("Starting set rest pose operation...")
