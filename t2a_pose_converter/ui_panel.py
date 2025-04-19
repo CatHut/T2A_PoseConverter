@@ -3,6 +3,20 @@ from bpy.props import PointerProperty, EnumProperty, FloatProperty, StringProper
 from bpy.types import Panel, PropertyGroup
 from .utils import find_related_mesh_objects, write_log
 
+# ────────────────────────────────────────────────────────────────
+#  AddonPreferences と同期するための update コールバック
+# ────────────────────────────────────────────────────────────────
+ADDON_NAME = __package__.split('.')[0]  # "TA_PoseConverter"
+
+def _sync_to_pref_shoulder(self, context):
+    prefs = context.preferences.addons[ADDON_NAME].preferences
+    prefs.shoulder_rotation_angle = self.shoulder_rotation_angle
+
+def _sync_to_pref_upper(self, context):
+    prefs = context.preferences.addons[ADDON_NAME].preferences
+    prefs.upperarm_rotation_angle = self.upperarm_rotation_angle
+
+
 class PoseConverterProperties(PropertyGroup):
     # プロパティ定義はそのまま
     conversion_mode: EnumProperty(
@@ -15,20 +29,22 @@ class PoseConverterProperties(PropertyGroup):
         default='A_TO_T'
     )
 
-    shoulder_rotation_angle: FloatProperty(
-        name="Shoulder Y Rotation",
-        description="Rotation angle in degrees for shoulder bones",
-        default=0.0,
-        min=-90.0,
-        max=90.0
+    shoulder_rotation_angle : FloatProperty(
+        name = "Shoulder Y Rotation",
+        description = "Rotation angle in degrees for shoulder bones",
+        default = 0.0,
+        min = -90.0,
+        max = 90.0,
+        update = _sync_to_pref_shoulder
     )
-    
-    upperarm_rotation_angle: FloatProperty(
-        name="UpperArm Y Rotation",
-        description="Rotation angle in degrees for upper arm bones",
-        default=30.0,
-        min=-90.0,
-        max=90.0
+
+    upperarm_rotation_angle : FloatProperty(
+        name = "UpperArm Y Rotation",
+        description = "Rotation angle in degrees for upper arm bones",
+        default = 30.0,
+        min = -90.0,
+        max = 90.0,
+        update = _sync_to_pref_upper
     )
 
     shoulder_l: StringProperty(
@@ -50,6 +66,12 @@ class PoseConverterProperties(PropertyGroup):
         name="UpperArm R",
         description="Right upper arm bone"
     )
+
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="デフォルトの回転角度")
+        layout.prop(self, "shoulder_rotation_angle")
+        layout.prop(self, "upperarm_rotation_angle")
 
 
 class PoseToolPanel(Panel):
